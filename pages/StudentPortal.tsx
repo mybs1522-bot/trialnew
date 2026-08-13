@@ -967,6 +967,23 @@ export default function StudentPortal() {
     }
   }, [location.search]);
 
+  const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      
+      const atBottom = documentHeight <= windowHeight + 100 || (windowHeight + scrollTop >= documentHeight - 150);
+      setIsScrolledToBottom(atBottom);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
@@ -1274,8 +1291,8 @@ export default function StudentPortal() {
 
       </div>
 
-      {/* ═══════ FLOATING PROFILE BUTTON AT BOTTOM OF PAGE ═══════ */}
-      <div className="fixed bottom-6 right-6 z-50">
+      {/* ═══════ FLOATING PROFILE BUTTON AT BOTTOM OF PAGE (Visible only when scrolled to bottom) ═══════ */}
+      <div className={`fixed bottom-6 right-6 z-50 transition-all duration-300 transform ${isScrolledToBottom ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-8 pointer-events-none'}`}>
         <div className="relative">
           <button
             onClick={() => setShowProfileMenu(!showProfileMenu)}
