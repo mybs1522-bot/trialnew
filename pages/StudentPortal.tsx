@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { 
   PlayCircle, ShieldCheck, Clock, BookOpen, UserCheck, 
   Sparkles, LogOut, Video, ArrowLeft, ChevronRight, CheckCircle2,
-  Lock, AlertTriangle, Loader2
+  Lock, AlertTriangle, Loader2, User
 } from 'lucide-react';
 
 
@@ -924,6 +924,7 @@ export default function StudentPortal() {
   const [selectedCourse, setSelectedCourse] = useState<CourseItem | null>(null);
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [subStatusInfo, setSubStatusInfo] = useState<{ active: boolean; status: string }>({ active: true, status: 'active' });
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   // Handle returning from Stripe Checkout with success
   useEffect(() => {
@@ -1103,17 +1104,54 @@ export default function StudentPortal() {
               <p className="text-xs text-zinc-400 mt-1">Full unrestricted access to all architecture & rendering masterclasses.</p>
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="bg-zinc-800 border border-zinc-700 px-3 py-2 rounded-xl text-right">
-                <p className="text-[10px] text-zinc-400 font-mono">TRIAL STATUS</p>
-                <p className="text-xs font-bold text-orange-400 flex items-center gap-1">
-                  <Clock size={12} /> 72 Hours Remaining
-                </p>
-              </div>
+            {/* Student Profile Icon & Dropdown Menu */}
+            <div className="relative">
+              <button
+                onClick={() => setShowProfileMenu(!showProfileMenu)}
+                className="w-10 h-10 rounded-full bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 flex items-center justify-center text-white transition-all shadow-md active:scale-95 cursor-pointer focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                aria-label="Student Profile"
+              >
+                <User size={20} className="text-orange-400" />
+              </button>
 
-              <Button variant="outline" size="sm" onClick={handleLogout} className="border-zinc-700 text-zinc-300 hover:bg-zinc-800">
-                <LogOut size={14} className="mr-1" /> Sign Out
-              </Button>
+              {showProfileMenu && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-40" 
+                    onClick={() => setShowProfileMenu(false)} 
+                  />
+                  <div className="absolute right-0 mt-2 w-64 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl p-4 z-50 animate-in fade-in zoom-in-95 duration-150 text-left">
+                    {/* User Info */}
+                    <div className="flex items-center gap-3 pb-3 mb-3 border-b border-zinc-800">
+                      <div className="w-9 h-9 rounded-full bg-orange-500/20 border border-orange-500/30 flex items-center justify-center text-orange-400 font-bold text-sm shrink-0">
+                        {user.name ? user.name.charAt(0).toUpperCase() : 'S'}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-bold text-white truncate capitalize">{user.name}</p>
+                        <p className="text-xs text-zinc-400 truncate">{user.email}</p>
+                      </div>
+                    </div>
+
+                    {/* Hidden Trial Status Badge Inside Profile Menu */}
+                    <div className="bg-zinc-800/80 border border-zinc-700/80 p-3 rounded-xl mb-3">
+                      <p className="text-[10px] text-zinc-400 font-mono uppercase tracking-wider">TRIAL STATUS</p>
+                      <p className="text-xs font-bold text-orange-400 flex items-center gap-1.5 mt-0.5">
+                        <Clock size={13} className="shrink-0" /> 72 Hours Remaining
+                      </p>
+                    </div>
+
+                    {/* Sign Out Button */}
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => { setShowProfileMenu(false); handleLogout(); }} 
+                      className="w-full border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white justify-start"
+                    >
+                      <LogOut size={14} className="mr-2 text-red-400" /> Sign Out
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
