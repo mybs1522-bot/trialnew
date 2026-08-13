@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Star, CheckCircle, CheckCircle2, X, ChevronDown, Sparkles, Eye, Download, ShieldCheck, Timer, Phone, Mail, User, Lock, Loader2 } from 'lucide-react';
+import { ArrowRight, Star, CheckCircle, CheckCircle2, X, ChevronDown, Sparkles, Eye, Download, ShieldCheck, Timer, Phone, Mail, User, Lock, Loader2, Globe } from 'lucide-react';
 import { COURSES } from '../constants';
 import { triggerStripeSubscriptionCheckout } from '../lib/stripe';
 import { sendStudentWelcomeEmail } from '../lib/email';
@@ -306,6 +306,44 @@ const LandingPage: React.FC = () => {
         <section className="py-8 md:py-10 px-4 md:px-5">
           <div className="max-w-3xl mx-auto">
             <CtaWithTimer timeLeft={timeLeft} onClick={openPaymentModal} variant="green" />
+          </div>
+        </section>
+
+        {/* ═══════ 3.5. 50,000+ STUDENTS WORLDWIDE ═══════ */}
+        <section className="py-16 md:py-20 bg-white border-b border-slate-200">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-10">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-orange-50 border border-orange-200 rounded-full shadow-sm mb-3">
+                <Globe size={14} className="text-orange-600 shrink-0" />
+                <span className="text-xs font-bold text-slate-700">GLOBAL COMMUNITY & REVIEWS</span>
+              </div>
+              <h2 className="text-3xl md:text-5xl font-display font-extrabold text-slate-900 tracking-tight mb-3">
+                <span className="text-orange-600">50,000+</span> Students Worldwide
+              </h2>
+              <p className="text-slate-600 text-sm md:text-base max-w-2xl mx-auto font-medium">
+                Join thousands of passionate architects, interior designers, and 3D visualizers who transformed their portfolios and careers.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-8 max-w-4xl mx-auto">
+              {/* Image 1: Social Media Comments & Reviews Wall */}
+              <div className="overflow-hidden rounded-2xl md:rounded-3xl border border-slate-200 shadow-xl hover:shadow-2xl transition-all duration-300 group bg-slate-900">
+                <img
+                  src="/students-worldwide-1.jpg"
+                  alt="50,000+ Students Worldwide Reviews & Testimonials"
+                  className="w-full h-auto object-cover group-hover:scale-[1.01] transition-transform duration-500"
+                />
+              </div>
+
+              {/* Image 2: Zoom Live Community Masterclass */}
+              <div className="overflow-hidden rounded-2xl md:rounded-3xl border border-slate-200 shadow-xl hover:shadow-2xl transition-all duration-300 group bg-slate-900">
+                <img
+                  src="/students-worldwide-2.png"
+                  alt="Live Architecture Masterclass Community with 50,000+ Students"
+                  className="w-full h-auto object-cover group-hover:scale-[1.01] transition-transform duration-500"
+                />
+              </div>
+            </div>
           </div>
         </section>
 
