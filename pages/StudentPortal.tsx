@@ -1091,69 +1091,12 @@ export default function StudentPortal() {
   return (
     <div className="min-h-screen bg-background pt-20 pb-16">
       {/* ═══════ TOP STUDENT HEADER ═══════ */}
-      <div className="bg-zinc-900 text-white border-b border-zinc-800">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-7xl">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <div className="inline-flex items-center gap-1.5 text-xs font-bold text-orange-400 bg-orange-500/10 px-3 py-1 rounded-full border border-orange-500/20 mb-2">
-                <Sparkles size={12} /> 3-DAY FREE TRIAL ACTIVE
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-                Welcome, <span className="text-orange-400 capitalize">{user.name}</span>
-              </h1>
-              <p className="text-xs text-zinc-400 mt-1">Full unrestricted access to all architecture & rendering masterclasses.</p>
-            </div>
-
-            {/* Student Profile Icon & Dropdown Menu */}
-            <div className="relative">
-              <button
-                onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="w-10 h-10 rounded-full bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 flex items-center justify-center text-white transition-all shadow-md active:scale-95 cursor-pointer focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-                aria-label="Student Profile"
-              >
-                <User size={20} className="text-orange-400" />
-              </button>
-
-              {showProfileMenu && (
-                <>
-                  <div 
-                    className="fixed inset-0 z-40" 
-                    onClick={() => setShowProfileMenu(false)} 
-                  />
-                  <div className="absolute right-0 mt-2 w-64 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl p-4 z-50 animate-in fade-in zoom-in-95 duration-150 text-left">
-                    {/* User Info */}
-                    <div className="flex items-center gap-3 pb-3 mb-3 border-b border-zinc-800">
-                      <div className="w-9 h-9 rounded-full bg-orange-500/20 border border-orange-500/30 flex items-center justify-center text-orange-400 font-bold text-sm shrink-0">
-                        {user.name ? user.name.charAt(0).toUpperCase() : 'S'}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-bold text-white truncate capitalize">{user.name}</p>
-                        <p className="text-xs text-zinc-400 truncate">{user.email}</p>
-                      </div>
-                    </div>
-
-                    {/* Hidden Trial Status Badge Inside Profile Menu */}
-                    <div className="bg-zinc-800/80 border border-zinc-700/80 p-3 rounded-xl mb-3">
-                      <p className="text-[10px] text-zinc-400 font-mono uppercase tracking-wider">TRIAL STATUS</p>
-                      <p className="text-xs font-bold text-orange-400 flex items-center gap-1.5 mt-0.5">
-                        <Clock size={13} className="shrink-0" /> 72 Hours Remaining
-                      </p>
-                    </div>
-
-                    {/* Sign Out Button */}
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => { setShowProfileMenu(false); handleLogout(); }} 
-                      className="w-full border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white justify-start"
-                    >
-                      <LogOut size={14} className="mr-2 text-red-400" /> Sign Out
-                    </Button>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
+      <div className="bg-zinc-900 text-white border-b border-zinc-800 py-6">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+            Welcome, <span className="text-orange-400 capitalize">{user.name}</span>
+          </h1>
+          <p className="text-xs sm:text-sm text-zinc-400 mt-1">Full unrestricted access to all architecture & rendering masterclasses.</p>
         </div>
       </div>
 
@@ -1329,6 +1272,66 @@ export default function StudentPortal() {
           </div>
         )}
 
+      </div>
+
+      {/* ═══════ FLOATING PROFILE BUTTON AT BOTTOM OF PAGE ═══════ */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <div className="relative">
+          <button
+            onClick={() => setShowProfileMenu(!showProfileMenu)}
+            className="w-14 h-14 rounded-full bg-zinc-900 hover:bg-zinc-800 border-2 border-orange-500/50 text-orange-400 shadow-2xl hover:scale-105 transition-all flex items-center justify-center cursor-pointer active:scale-95 group focus:outline-none focus:ring-4 focus:ring-orange-500/30"
+            aria-label="Student Profile & Trial Info"
+          >
+            <div className="relative">
+              <User size={26} className="text-orange-400 group-hover:scale-110 transition-transform" />
+              <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-zinc-900 rounded-full animate-pulse"></span>
+            </div>
+          </button>
+
+          {showProfileMenu && (
+            <>
+              <div 
+                className="fixed inset-0 z-40 bg-black/30 backdrop-blur-xs" 
+                onClick={() => setShowProfileMenu(false)} 
+              />
+              <div className="absolute right-0 bottom-16 mb-2 w-72 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl p-4 z-50 animate-in fade-in slide-in-from-bottom-4 duration-200 text-left">
+                {/* User Info */}
+                <div className="flex items-center gap-3 pb-3 mb-3 border-b border-zinc-800">
+                  <div className="w-10 h-10 rounded-full bg-orange-500/20 border border-orange-500/30 flex items-center justify-center text-orange-400 font-bold text-base shrink-0">
+                    {user.name ? user.name.charAt(0).toUpperCase() : 'S'}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-bold text-white truncate capitalize">{user.name}</p>
+                    <p className="text-xs text-zinc-400 truncate">{user.email}</p>
+                  </div>
+                </div>
+
+                {/* Trial Active Badge & Details */}
+                <div className="bg-zinc-800/80 border border-zinc-700/80 p-3 rounded-xl mb-3 space-y-2">
+                  <div className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                    <Sparkles size={11} /> 3-DAY FREE TRIAL ACTIVE
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-zinc-400 font-mono uppercase tracking-wider">TRIAL STATUS</p>
+                    <p className="text-xs font-bold text-orange-400 flex items-center gap-1.5 mt-0.5">
+                      <Clock size={13} className="shrink-0" /> 72 Hours Remaining
+                    </p>
+                  </div>
+                </div>
+
+                {/* Sign Out Button */}
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => { setShowProfileMenu(false); handleLogout(); }} 
+                  className="w-full border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white justify-start"
+                >
+                  <LogOut size={14} className="mr-2 text-red-400" /> Sign Out
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
