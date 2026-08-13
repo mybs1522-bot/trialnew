@@ -109,32 +109,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, ini
 
   const handlePaymentStart = async () => {
     setError('');
-    if (!selectedPlan) return;
-    setIsLoading(true);
-
-    try {
-      if (selectedPlan.price === '$49') {
-         await submitPhoneNumber('', selectedPlan.id);
-         window.location.href = 'https://www.avada.space/checkout';
-         return;
-      }
-      if (selectedPlan.price === '$99') {
-         await submitPhoneNumber('', selectedPlan.id);
-         window.location.href = 'https://www.avada.space/checkout-now';
-         return;
-      }
-      openRazorpayCheckout({
-        amount: selectedPlan.id === 'lifetime-plus' ? 999 : 397,
-        courseIds: ['all-courses-bundle'],
-        userPhone: '',
-        userEmail: '',
-        onSuccess: handleRazorpaySuccess,
-        onError: handleRazorpayFailure
-      });
-    } catch (err) {
-      setError('Something went wrong. Please try again.');
-      setIsLoading(false);
-    }
+    window.location.href = '/checkout';
   };
 
   const isBundleComplete = addedCount >= COURSES.length;

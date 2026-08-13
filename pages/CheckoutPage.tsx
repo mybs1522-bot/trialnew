@@ -4,8 +4,7 @@ import { PRODUCTS } from '../lib/data';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '../components/ui/card';
-import { triggerRazorpaySubscriptionCheckout } from '../lib/razorpay';
-import { sendStudentWelcomeEmail } from '../lib/email';
+import { triggerStripeSubscriptionCheckout } from '../lib/stripe';
 import { Lock, ShieldCheck, CheckCircle2, Clock, Sparkles } from 'lucide-react';
 
 
@@ -16,62 +15,44 @@ export default function CheckoutPage() {
   const searchParams = new URLSearchParams(location.search);
   const productId = searchParams.get('product');
   const isCart = searchParams.get('cart') === 'true';
+  const isCanceled = searchParams.get('canceled') === 'true';
   
   const product = productId ? PRODUCTS.find(p => p.id === productId) : PRODUCTS[0];
 
   const [formData, setFormData] = useState({
-    name: '',
     email: '',
-    phone: '',
     termsAccepted: false
   });
   
   const [errors, setErrors] = useState<any>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validate = () => {
     const newErrors: any = {};
-    if (!formData.name.trim()) newErrors.name = "Full name is required";
     if (!formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) newErrors.email = "Please enter a valid email address";
-    if (!formData.phone.match(/^\d{10}$/)) newErrors.phone = "Please enter a valid 10-digit phone number";
     if (!formData.termsAccepted) newErrors.terms = "You must accept the terms and conditions to proceed";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
-    triggerRazorpaySubscriptionCheckout(
+    setIsSubmitting(true);
+    await triggerStripeSubscriptionCheckout(
       {
-        monthlyPrice: 399,
+        monthlyPrice: 20,
         trialDays: 3,
         productName: product ? product.name : 'Avada Architecture Pass',
       },
-      (res) => {
-        localStorage.setItem('student_session', JSON.stringify({
-          email: formData.email,
-          name: formData.name,
-          trialActive: true
-        }));
-
-        // Send Welcome Email via Resend API
-        sendStudentWelcomeEmail({
-          studentEmail: formData.email,
-          studentName: formData.name,
-        });
-
-        alert('3-Day Free Trial Activated! Welcome to your Student Portal.');
-        navigate('/portal');
-      },
-
-      (err) => {
-        console.error("Subscription setup failed", err);
-      },
       {
-        name: formData.name,
+        name: formData.email.split('@')[0],
         email: formData.email,
-        contact: formData.phone
+        phone: ''
+      },
+      () => {
+        setIsSubmitting(false);
       }
     );
   };
@@ -88,39 +69,33 @@ export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-muted/20 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
+        {isCanceled && (
+          <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-4 mb-6 text-red-800 dark:text-red-300 text-sm">
+            Checkout was canceled. You can try again whenever you're ready.
+          </div>
+        )}
+
         {/* Trial Header Badge */}
         <div className="bg-orange-500/10 border border-orange-500/30 rounded-2xl p-4 mb-8 flex items-center gap-3 text-orange-800 dark:text-orange-300">
           <Sparkles size={24} className="shrink-0 text-orange-600 dark:text-orange-400" />
           <div>
             <p className="font-bold text-sm sm:text-base">3-Day Free Trial Activated</p>
-            <p className="text-xs opacity-90">Enjoy 72 hours of full access. Auto-renews at ₹399/month via UPI AutoPay starting Day 4. Cancel anytime before trial ends.</p>
+            <p className="text-xs opacity-90">Enjoy 72 hours of full access. Auto-renews at $20/month via Stripe starting Day 4. Cancel anytime before trial ends.</p>
           </div>
         </div>
 
         <h1 className="text-3xl font-extrabold mb-2">Activate Your 3-Day Free Trial</h1>
-        <p className="text-muted-foreground mb-8">Setup your UPI AutoPay mandate for your 3-day free trial.</p>
+        <p className="text-muted-foreground mb-8">Enter your email and card details to enable your 3-day free trial.</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Left Col: Customer Details Form */}
           <div>
             <Card>
               <CardHeader>
-                <CardTitle>Contact Details</CardTitle>
+                <CardTitle>Account Email</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-5" id="checkout-form">
-                  <div>
-                    <label className="block text-sm font-semibold mb-1.5">Full Name <span className="text-destructive">*</span></label>
-                    <Input 
-                      type="text" 
-                      placeholder="Enter your full name" 
-                      value={formData.name}
-                      onChange={(e) => setFormData({...formData, name: e.target.value})}
-                      className={errors.name ? "border-destructive" : ""}
-                    />
-                    {errors.name && <p className="text-destructive text-xs mt-1">{errors.name}</p>}
-                  </div>
-
                   <div>
                     <label className="block text-sm font-semibold mb-1.5">Email Address <span className="text-destructive">*</span></label>
                     <Input 
@@ -131,19 +106,7 @@ export default function CheckoutPage() {
                       className={errors.email ? "border-destructive" : ""}
                     />
                     {errors.email && <p className="text-destructive text-xs mt-1">{errors.email}</p>}
-                    <p className="text-muted-foreground text-xs mt-1">Course access link will be sent to this email</p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold mb-1.5">Phone Number (UPI Linked) <span className="text-destructive">*</span></label>
-                    <Input 
-                      type="tel" 
-                      placeholder="10-digit mobile number" 
-                      value={formData.phone}
-                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                      className={errors.phone ? "border-destructive" : ""}
-                    />
-                    {errors.phone && <p className="text-destructive text-xs mt-1">{errors.phone}</p>}
+                    <p className="text-muted-foreground text-xs mt-1">Your course access link and portal login will be linked to this email</p>
                   </div>
 
                   <div className="flex items-start gap-3 pt-4 border-t border-border">
@@ -155,7 +118,7 @@ export default function CheckoutPage() {
                       onChange={(e) => setFormData({...formData, termsAccepted: e.target.checked})}
                     />
                     <label htmlFor="terms" className="text-sm text-muted-foreground cursor-pointer leading-relaxed">
-                      I accept the <Link to="/terms" className="text-primary hover:underline font-semibold">Terms</Link>, <Link to="/privacy-policy" className="text-primary hover:underline font-semibold">Privacy Policy</Link>, and authorize a recurring UPI AutoPay mandate of ₹399/month starting in 3 days.
+                      I accept the <Link to="/terms" className="text-primary hover:underline font-semibold">Terms</Link>, <Link to="/privacy-policy" className="text-primary hover:underline font-semibold">Privacy Policy</Link>, and authorize a recurring subscription of $20/month starting in 3 days.
                     </label>
                   </div>
                   {errors.terms && <p className="text-destructive text-xs">{errors.terms}</p>}
@@ -184,30 +147,36 @@ export default function CheckoutPage() {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Initial Trial (3 Days)</span>
-                    <span className="font-bold text-orange-600">FREE (₹0)</span>
+                    <span className="font-bold text-orange-600">FREE ($0)</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Recurring Billing (from Day 4)</span>
-                    <span className="font-bold">₹399 / month</span>
+                    <span className="font-bold">$20 / month</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Payment Method</span>
-                    <span className="font-medium text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">UPI AutoPay</span>
+                    <span className="font-medium text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">Stripe Secure</span>
                   </div>
                 </div>
 
                 <div className="pt-4 border-t border-border flex justify-between items-center text-lg font-extrabold">
                   <span>Due Today</span>
-                  <span className="text-orange-600">₹0</span>
+                  <span className="text-orange-600">$0</span>
                 </div>
               </CardContent>
               <CardFooter className="flex-col gap-4">
-                <Button type="submit" form="checkout-form" size="lg" className="w-full text-lg h-14 shadow-lg shadow-primary/25 bg-orange-600 hover:bg-orange-700 text-white">
-                  Start 3-Day Free Trial (₹0) <Lock size={16} className="ml-2" />
+                <Button 
+                  type="submit" 
+                  form="checkout-form" 
+                  size="lg" 
+                  disabled={isSubmitting}
+                  className="w-full text-lg h-14 shadow-lg shadow-primary/25 bg-orange-600 hover:bg-orange-700 text-white disabled:opacity-50"
+                >
+                  {isSubmitting ? 'Redirecting to Stripe...' : 'Start 3-Day Free Trial ($0)'} <Lock size={16} className="ml-2" />
                 </Button>
                 <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground text-center">
                   <ShieldCheck size={14} className="text-orange-500 shrink-0" />
-                  Razorpay UPI AutoPay • Mandate authorization only (Free Trial)
+                  Stripe Secure Checkout • Card authorization only (Free Trial)
                 </div>
               </CardFooter>
             </Card>
@@ -219,7 +188,7 @@ export default function CheckoutPage() {
               </div>
               <div className="flex items-center gap-3 text-sm">
                 <Clock size={16} className="text-orange-500 shrink-0" />
-                <span>First ₹399 charge automatically applies in 72 hours.</span>
+                <span>First $20 charge automatically applies in 72 hours.</span>
               </div>
               <div className="flex items-center gap-3 text-sm">
                 <CheckCircle2 size={16} className="text-orange-500 shrink-0" />

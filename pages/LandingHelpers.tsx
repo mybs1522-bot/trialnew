@@ -142,31 +142,31 @@ export const VALUE_STACK_ITEMS = [
 ];
 
 export const TESTIMONIALS_LANDING = [
-  { name: 'Priya P.', role: 'Freelance Designer', location: 'Mumbai, IN', content: 'I used to cry when V-Ray crashed. Literally. The support team is so incredibly kind and patient. Now I use AI so well that I feel completely secure in my career.' },
-  { name: 'Aravind S.', role: 'Senior Architect', location: 'Bangalore, IN', content: 'I feared AI would replace my studio. But Avada held my hand through the transition. We now use it to generate gorgeous concepts for clients in minutes.' },
-  { name: 'Meera I.', role: '3D Visualizer', location: 'Chennai, IN', content: 'The step-by-step guidance is amazing for beginners. Whenever my scene looks dark or weird, I just ask the support team. They are absolute lifesavers.' },
-  { name: 'Rahul V.', role: 'Architecture Student', location: 'Delhi, IN', content: 'I felt so behind in college because they still teach completely outdated methods. Within two weeks here, I gained the confidence to start taking well-paying projects.' },
-  { name: 'Ananya G.', role: 'Interior Designer', location: 'Pune, IN', content: 'To have someone to actually look at your screen and say "Oh, simply press this button" saves weeks of frustration. Best trial I ever signed up for.' },
-  { name: 'Vikram S.', role: 'Landscape Architect', location: 'Jaipur, IN', content: 'The continuous support makes learning stress-free. D5 Render combined with AI generation is just magical. It took away all my anxiety about falling behind.' },
-  { name: 'Neha K.', role: 'Studio Owner', location: 'Lucknow, IN', content: 'My team of 4 now works with zero stress because we integrated AI the way Avada taught us. No more late nights before client meetings.' },
-  { name: 'Rohit M.', role: 'Freelance Visualizer', location: 'Ahmedabad, IN', content: 'I almost quit 3D entirely because it felt too overwhelming. The friendly support team here broke it down to be so simple. I owe them my entire successful freelance business.' },
-  { name: 'Simran P.', role: 'Design Student', location: 'Chandigarh, IN', content: 'Started from absolute zero. I didn\'t even know what SketchUp was. 15 days later, thanks to their constant hand-holding, my portfolio landed me a paid studio gig.' },
-  { name: 'Arjun D.', role: 'Architect & Educator', location: 'Hyderabad, IN', content: 'I teach at a university, and sadly, we don\'t provide this level of modern, practical support. I genuinely recommend this to all my anxious students to secure their futures.' },
+  { name: 'Pamela P.', role: 'Freelance Designer', location: 'New York, US', content: 'I used to cry when V-Ray crashed. Literally. The support team is so incredibly kind and patient. Now I use AI so well that I feel completely secure in my career.' },
+  { name: 'Aaron S.', role: 'Senior Architect', location: 'London, UK', content: 'I feared AI would replace my studio. But Avada held my hand through the transition. We now use it to generate gorgeous concepts for clients in minutes.' },
+  { name: 'Maya I.', role: '3D Visualizer', location: 'Toronto, CA', content: 'The step-by-step guidance is amazing for beginners. Whenever my scene looks dark or weird, I just ask the support team. They are absolute lifesavers.' },
+  { name: 'Ryan V.', role: 'Architecture Student', location: 'Chicago, US', content: 'I felt so behind in college because they still teach completely outdated methods. Within two weeks here, I gained the confidence to start taking well-paying projects.' },
+  { name: 'Anna G.', role: 'Interior Designer', location: 'Los Angeles, US', content: 'To have someone to actually look at your screen and say "Oh, simply press this button" saves weeks of frustration. Best trial I ever signed up for.' },
+  { name: 'Victor S.', role: 'Landscape Architect', location: 'Sydney, AU', content: 'The continuous support makes learning stress-free. D5 Render combined with AI generation is just magical. It took away all my anxiety about falling behind.' },
+  { name: 'Sarah K.', role: 'Studio Owner', location: 'Vancouver, CA', content: 'My team of 4 now works with zero stress because we integrated AI the way Avada taught us. No more late nights before client meetings.' },
+  { name: 'Robert M.', role: 'Freelance Visualizer', location: 'Berlin, DE', content: 'I almost quit 3D entirely because it felt too overwhelming. The friendly support team here broke it down to be so simple. I owe them my entire successful freelance business.' },
+  { name: 'Samantha P.', role: 'Design Student', location: 'Melbourne, AU', content: 'Started from absolute zero. I didn\'t even know what SketchUp was. 15 days later, thanks to their constant hand-holding, my portfolio landed me a paid studio gig.' },
+  { name: 'Alex D.', role: 'Architect & Educator', location: 'San Francisco, US', content: 'I teach at a university, and sadly, we don\'t provide this level of modern, practical support. I genuinely recommend this to all my anxious students to secure their futures.' },
 ];
 
 export const FAQ_ITEMS_LANDING = [
-  { question: "How does the 3-Day Free Trial work?", answer: "When you sign up, you authorize a UPI AutoPay mandate for your 3-day free trial. You get immediate 72-hour unrestricted access to all 7 course masterclasses. Your subscription auto-renews at ₹399/month starting on Day 4 unless you cancel anytime during your trial." },
+  { question: "How does the 3-Day Free Trial work?", answer: "When you sign up, you enter your email and card details for your 3-day free trial. You get immediate 72-hour unrestricted access to all 7 course masterclasses. Your subscription auto-renews at $20/month starting on Day 4 unless you cancel anytime during your trial." },
   { question: "I'm terrified of AI taking my job. Will this help?", answer: "We completely understand that fear! AI is scary if you ignore it, but it's an incredible superpower when you master it. We will hold your hand and teach you exactly how to use AI as your personal assistant, making you brilliantly fast and completely irreplaceable." },
   { question: "I am a complete beginner and get overwhelmed easily. Is this for me?", answer: "Yes, this program was built exactly with you in mind. We know learning software can be intimidating. We start from the absolute basics ('how to click here') and our team is always available to hold your hand when you feel stuck." },
   { question: "Are you really going to help me, or is this just another course?", answer: "This is a true 24/7 support community. When your render looks weird or your software crashes, you don't have to figure it out alone. You reach out to us, and we patiently help you fix it. Your success is our personal mission." },
   { question: "Do I need to buy expensive software subscriptions?", answer: "Not at all. We will show you exactly how to easily access official free or student versions of the software. We want you earning safely, not spending unnecessarily on expensive licenses." },
-  { question: "What is the cancellation policy?", answer: "You can cancel your subscription mandate anytime during the 3-day trial period directly from your UPI app (Google Pay / PhonePe / Paytm) or by clicking Change Password / Cancel in your Student Portal." },
+  { question: "What is the cancellation policy?", answer: "You can cancel your subscription anytime during the 3-day trial period with one click from your Student Portal." },
   { question: "Can I access the training safely on my mobile?", answer: "Yes! All courses are hosted clearly online and work perfectly on any device — laptop, tablet, or phone. You can learn comfortably at your own pace anywhere." },
 ];
 
 export const INCOME_TIERS = [
-  { label: 'Single Render Charge', before: 'Struggling to ask ₹1000', after: 'Confidently quoting ₹5,000+', icon: '🖼️' },
-  { label: 'Interior Design Project', before: 'Rejected for poor 3D quality', after: 'Winning ₹80,000+ contracts', icon: '🏠' },
+  { label: 'Single Render Charge', before: 'Struggling to ask $50', after: 'Confidently quoting $500+', icon: '🖼️' },
+  { label: 'Interior Design Project', before: 'Rejected for poor 3D quality', after: 'Winning $5,000+ contracts', icon: '🏠' },
   { label: 'Time to Finish a Room', before: '3 Frustrating, Sleepless Nights', after: '2 Easy Hours with our AI Workflow', icon: '⏱️' },
   { label: 'Your Career Confidence', before: 'Constantly Anxious & Overwhelmed', after: 'Relaxed, In-Demand Professional', icon: '🌟' },
 ];

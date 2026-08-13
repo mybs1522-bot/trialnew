@@ -112,7 +112,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                                         <div className="font-bold text-gray-900 text-sm truncate">{course.title}</div>
                                     </div>
                                     <div className="text-right shrink-0 flex items-center gap-2">
-                                        <span className="font-display font-bold text-gray-900">₹{course.price}</span>
+                                        <span className="font-display font-bold text-gray-900">${course.price}</span>
                                         <button
                                             onClick={() => onRemove(course.id)}
                                             aria-label={`Remove ${course.title}`}
@@ -136,10 +136,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                                     <span className="text-xs font-bold uppercase tracking-widest text-brand-accent">Best Deal</span>
                                 </div>
                                 <div className="font-display font-bold text-base mb-1">
-                                    Get all 12 courses for ₹{BUNDLE_PRICE}
+                                    Get all 12 courses for ${BUNDLE_PRICE}
                                 </div>
                                 <div className="text-gray-400 text-[10px] mb-3 leading-tight">
-                                    Save ₹{(COURSES.length * 199 - BUNDLE_PRICE).toLocaleString()} vs buying individually
+                                    Save ${(COURSES.length * 49 - BUNDLE_PRICE).toLocaleString()} vs buying individually
                                 </div>
                                 <button
                                     onClick={onAddAll}
@@ -160,7 +160,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                                 All 12 courses added!
                             </div>
                             <div className="text-green-600 text-xs">
-                                Bundle discount applied: ₹{savings.toLocaleString()} saved
+                                Bundle discount applied: ${savings.toLocaleString()} saved
                             </div>
                         </div>
                     )}
@@ -168,7 +168,30 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
                 {/* Footer — Checkout */}
                 {cartIds.size > 0 && (
-                    <div className="p-5 border-t border-gray-100 bg-white">
+                    <div className="p-6 border-t border-gray-100 bg-white shrink-0">
+
+                        <div className="space-y-2 mb-4">
+                            <div className="flex items-center justify-between text-xs text-gray-500">
+                                <span>Subtotal</span>
+                                <span>${subtotal.toLocaleString()}</span>
+                            </div>
+                            {savings > 0 && (
+                                <div className="flex items-center justify-between text-xs text-green-600 font-bold">
+                                    <span>Bundle Discount</span>
+                                    <span>-${savings.toLocaleString()}</span>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="flex items-center justify-between mb-4">
+                            <span className="text-gray-500 text-sm font-medium">Total Payable</span>
+                            <div className="text-right">
+                                {allAdded && (
+                                    <div className="text-xs text-gray-400 line-through">${subtotal.toLocaleString()}</div>
+                                )}
+                                <div className="text-2xl font-display font-bold text-gray-900 tracking-tight">${finalTotal.toLocaleString()}</div>
+                            </div>
+                        </div>
                         {/* Dark Checkout Header */}
                         <div className="text-gray-900 font-bold mb-4 flex items-center justify-center gap-2">
                             <Lock size={16} className="text-gray-400" />

@@ -34,7 +34,7 @@ export default function TermsAndConditions() {
           <section>
             <h2 className="text-2xl font-bold mb-3">4. Pricing & Payment</h2>
             <p className="text-muted-foreground leading-relaxed">
-              All prices displayed on the Site are in Indian Rupees (₹) and are <strong>inclusive of all applicable taxes, including GST</strong>. The price you see is the final price you pay — there are no hidden charges. Payments are processed securely through Razorpay. We accept UPI, debit cards, credit cards, net banking, and wallets.
+              All prices displayed on the Site are in US Dollars ($) and are <strong>inclusive of all applicable taxes</strong>. The price you see is the final price you pay — there are no hidden charges. Payments are processed securely through Stripe. We accept all major credit cards, debit cards, and Apple/Google Pay.
             </p>
           </section>
 

@@ -6,48 +6,71 @@ import { supabase } from '../services/supabase';
  */
 export async function registerStudent(data: {
   email: string;
-  phone: string;
-  name: string;
+  phone?: string;
+  name?: string;
   subscriptionId?: string;
 }): Promise<boolean> {
+  const emailClean = data.email.trim().toLowerCase();
+  const phoneClean = (data.phone || '').trim();
+  const nameClean = (data.name || emailClean.split('@')[0]).trim();
+
   const { error } = await supabase
     .from('students')
     .upsert(
       {
-        email: data.email.trim().toLowerCase(),
-        phone: data.phone.trim(),
-        name: data.name.trim(),
+        email: emailClean,
+        phone: phoneClean,
+        name: nameClean,
         subscription_id: data.subscriptionId || null,
         trial_start: new Date().toISOString(),
         trial_active: true,
       },
-      { onConflict: 'email,phone' }
+      { onConflict: 'email' }
     );
 
   if (error) {
-    console.error('Failed to register student in database:', error);
-    return false;
+    // If onConflict email fails due to existing table constraint, retry without onConflict clause
+    const { error: retryErr } = await supabase
+      .from('students')
+      .upsert({
+        email: emailClean,
+        phone: phoneClean,
+        name: nameClean,
+        subscription_id: data.subscriptionId || null,
+        trial_start: new Date().toISOString(),
+        trial_active: true,
+      });
+
+    if (retryErr) {
+      console.error('Failed to register student in database:', retryErr);
+      return false;
+    }
   }
   return true;
 }
 
 /**
- * Verify a student's login by checking email + phone against the database.
+ * Verify a student's login by checking email (and optional phone) against the database.
  * Returns verification result with student data or error reason.
  */
 export async function verifyStudentLogin(
   email: string,
-  phone: string
+  phone?: string
 ): Promise<{
   verified: boolean;
   student: { id: string; email: string; phone: string; name: string; trial_active: boolean; trial_start: string } | null;
   reason: string;
 }> {
-  const { data, error } = await supabase
+  let query = supabase
     .from('students')
     .select('*')
-    .eq('email', email.trim().toLowerCase())
-    .eq('phone', phone.trim())
+    .eq('email', email.trim().toLowerCase());
+
+  if (phone && phone.trim()) {
+    query = query.eq('phone', phone.trim());
+  }
+
+  const { data, error } = await query
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -61,7 +84,7 @@ export async function verifyStudentLogin(
     return {
       verified: false,
       student: null,
-      reason: 'No account found with this email and phone number. Please check your details or start a free trial first.',
+      reason: 'No account found with this email address. Please check your email or start a free trial first.',
     };
   }
 

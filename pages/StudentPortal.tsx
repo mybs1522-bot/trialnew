@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { SecureVideoPlayer } from '../components/SecureVideoPlayer';
-import { verifySubscriptionStatus } from '../lib/razorpay';
-import { verifyStudentLogin } from '../lib/students';
+import { registerStudent, verifyStudentLogin } from '../lib/students';
+import { sendStudentWelcomeEmail } from '../lib/email';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -907,6 +907,7 @@ const COURSES_PORTAL_DATA: CourseItem[] = [
 
 export default function StudentPortal() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Check existing session
   const [user, setUser] = useState<{ email: string; name: string; trialActive: boolean } | null>(() => {
@@ -924,41 +925,63 @@ export default function StudentPortal() {
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [subStatusInfo, setSubStatusInfo] = useState<{ active: boolean; status: string }>({ active: true, status: 'active' });
 
-  // Check Razorpay Subscription status on student portal load
+  // Handle returning from Stripe Checkout with success
   useEffect(() => {
-    if (user) {
-      const activeSubId = import.meta.env.VITE_RAZORPAY_SUBSCRIPTION_ID || 'sub_TOzqlrIULqdtIB';
-      verifySubscriptionStatus(activeSubId).then((res) => {
-        setSubStatusInfo(res);
-        if (!res.active) {
-          const updatedUser = { ...user, trialActive: false };
-          setUser(updatedUser);
-          localStorage.setItem('student_session', JSON.stringify(updatedUser));
+    const searchParams = new URLSearchParams(location.search);
+    const sessionId = searchParams.get('session_id');
+    const isSuccess = searchParams.get('success') === 'true';
+
+    if (isSuccess && sessionId) {
+      const pendingRaw = localStorage.getItem('pending_student_checkout');
+      if (pendingRaw) {
+        try {
+          const pending = JSON.parse(pendingRaw);
+          if (pending.email) {
+            registerStudent({
+              email: pending.email,
+              phone: pending.phone || '',
+              name: pending.name || pending.email.split('@')[0],
+              subscriptionId: sessionId
+            });
+
+            sendStudentWelcomeEmail({
+              studentEmail: pending.email,
+              studentName: pending.name || pending.email.split('@')[0],
+            });
+
+            const newUser = {
+              email: pending.email,
+              phone: pending.phone || '',
+              name: pending.name || pending.email.split('@')[0],
+              trialActive: true
+            };
+            localStorage.setItem('student_session', JSON.stringify(newUser));
+            setUser(newUser);
+            localStorage.removeItem('pending_student_checkout');
+          }
+        } catch (e) {
+          console.error('Error restoring pending checkout:', e);
         }
-      });
+      }
     }
-  }, [user?.email]);
+  }, [location.search]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
 
     const trimmedEmail = loginEmail.trim();
-    const trimmedPhone = loginPhone.trim().replace(/\D/g, '');
+    const trimmedPhone = loginPhone.trim();
 
     if (!trimmedEmail) {
       setLoginError('Please enter your registered email address.');
-      return;
-    }
-    if (!trimmedPhone || trimmedPhone.length < 10) {
-      setLoginError('Please enter a valid 10-digit mobile number.');
       return;
     }
 
     setLoginLoading(true);
 
     try {
-      const result = await verifyStudentLogin(trimmedEmail, trimmedPhone);
+      const result = await verifyStudentLogin(trimmedEmail, trimmedPhone || undefined);
 
       if (!result.verified || !result.student) {
         setLoginError(result.reason);
@@ -969,7 +992,7 @@ export default function StudentPortal() {
       // Verified! Create session
       const newUser = {
         email: result.student.email,
-        phone: result.student.phone,
+        phone: result.student.phone || '',
         name: result.student.name || trimmedEmail.split('@')[0],
         trialActive: result.student.trial_active,
       };
@@ -1008,7 +1031,7 @@ export default function StudentPortal() {
                 <UserCheck size={24} />
               </div>
               <CardTitle className="text-2xl font-bold">Student Portal Login</CardTitle>
-              <p className="text-xs text-zinc-400 mt-1">Enter your registered email & phone to access courses</p>
+              <p className="text-xs text-zinc-400 mt-1">Enter your registered email address to access your courses</p>
             </CardHeader>
 
             <CardContent className="p-6">
@@ -1029,20 +1052,6 @@ export default function StudentPortal() {
                     placeholder="you@example.com"
                     value={loginEmail}
                     onChange={(e) => { setLoginEmail(e.target.value); setLoginError(''); }}
-                    required
-                    disabled={loginLoading}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-muted-foreground mb-1">
-                    Registered Mobile Number
-                  </label>
-                  <Input
-                    type="tel"
-                    placeholder="10-digit mobile number"
-                    value={loginPhone}
-                    onChange={(e) => { setLoginPhone(e.target.value.replace(/\D/g, '').slice(0, 10)); setLoginError(''); }}
                     required
                     disabled={loginLoading}
                   />

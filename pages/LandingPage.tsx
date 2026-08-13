@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Star, CheckCircle, CheckCircle2, X, ChevronDown, Sparkles, Eye, Download, ShieldCheck, Timer, Phone, Mail, User, Lock, Loader2 } from 'lucide-react';
 import { COURSES } from '../constants';
-import { triggerRazorpaySubscriptionCheckout } from '../lib/razorpay';
+import { triggerStripeSubscriptionCheckout } from '../lib/stripe';
 import { sendStudentWelcomeEmail } from '../lib/email';
 import { registerStudent } from '../lib/students';
 import {
@@ -65,7 +65,7 @@ const CtaWithTimer = ({ timeLeft, onClick, variant = 'green' }: { timeLeft: { h:
           <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform shrink-0" />
         </button>
 
-        <p className={`text-[10px] font-medium ${variant === 'dark' ? 'text-slate-500' : 'text-slate-400'}`}>72 Hours Full Access • Then ₹399/mo • Cancel Anytime</p>
+        <p className={`text-[10px] font-medium ${variant === 'dark' ? 'text-slate-500' : 'text-slate-400'}`}>72 Hours Full Access • Then $20/mo • Cancel Anytime</p>
       </div>
     </div>
   );
@@ -79,16 +79,20 @@ const LandingPage: React.FC = () => {
 
   // Payment Modal State
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [nameError, setNameError] = useState(false);
-  const [phoneError, setPhoneError] = useState(false);
   const [emailError, setEmailError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [studentCount, setStudentCount] = useState(22392);
+  const [headlineIndex, setHeadlineIndex] = useState(0);
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setHeadlineIndex((prev) => (prev === 0 ? 1 : 0));
+    }, 3000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const calc = () => { const D = (3 * 3600 + 36 * 60 + 20) * 1000, now = Date.now(), r = D - (now % D); setTimeLeft({ h: Math.floor((r / 3600000) % 24), m: Math.floor((r / 60000) % 60), s: Math.floor((r / 1000) % 60) }); };
@@ -104,59 +108,28 @@ const LandingPage: React.FC = () => {
     setShowPaymentModal(true);
   };
 
-  const handleModalSubmit = (e: React.FormEvent) => {
+  const handleModalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    let hasError = false;
-    if (!name.trim()) { setNameError(true); hasError = true; } else { setNameError(false); }
-    if (!phone || phone.length < 10) { setPhoneError(true); hasError = true; } else { setPhoneError(false); }
-    if (!email || !validateEmail(email)) { setEmailError(true); hasError = true; } else { setEmailError(false); }
-    if (hasError) return;
-
+    if (!email || !validateEmail(email)) {
+      setEmailError(true);
+      return;
+    }
+    setEmailError(false);
     setIsLoading(true);
 
-    triggerRazorpaySubscriptionCheckout(
+    await triggerStripeSubscriptionCheckout(
       {
-        monthlyPrice: 399,
+        monthlyPrice: 20,
         trialDays: 3,
         productName: 'Avada Architecture Masterclass Pass',
       },
-      async (res) => {
-        setIsLoading(false);
-
-        // 1. Save student to Supabase database for login verification
-        await registerStudent({
-          email: email.trim(),
-          phone: phone.trim(),
-          name: name.trim() || email.split('@')[0],
-          subscriptionId: res.razorpay_subscription_id || '',
-        });
-
-        // 2. Save session locally for immediate portal access
-        localStorage.setItem('student_session', JSON.stringify({
-          email: email.trim(),
-          phone: phone.trim(),
-          name: name.trim() || email.split('@')[0],
-          trialActive: true
-        }));
-
-        // 3. Send welcome email
-        sendStudentWelcomeEmail({
-          studentEmail: email.trim(),
-          studentName: name.trim() || email.split('@')[0],
-        });
-
-        alert('3-Day Free Trial Activated! Welcome to your Student Portal.');
-        setShowPaymentModal(false);
-        navigate('/portal');
-      },
-      (err) => {
-        setIsLoading(false);
-        console.error('Subscription setup failed', err);
-      },
       {
-        name: name.trim() || 'Student',
+        name: email.split('@')[0],
         email: email.trim(),
-        contact: phone.trim()
+        phone: ''
+      },
+      () => {
+        setIsLoading(false);
       }
     );
   };
@@ -170,70 +143,84 @@ const LandingPage: React.FC = () => {
             <div className="flex flex-col items-center text-center pt-7 md:pt-14">
 
               {/* Top badge */}
-              <div className="mb-2 md:mb-3 inline-flex items-center gap-2 px-4 py-1.5 bg-orange-50 border border-orange-200 rounded-full shadow-sm">
-                <CheckCircle2 size={12} className="text-orange-600" />
-                <span className="text-[11px] md:text-xs font-semibold text-slate-700">Learn Interior & Exterior Design + <span className="text-orange-600 font-bold">AI</span></span>
+              <div className="mb-3 inline-flex items-center gap-2 px-4 py-1.5 bg-orange-50 border border-orange-200 rounded-full shadow-sm">
+                <CheckCircle2 size={13} className="text-orange-600 shrink-0" />
+                <span className="text-xs font-semibold text-slate-700">
+                  AI-Powered Design Masterclass • Charge <span className="text-orange-600 font-bold">$1,500–$5,000</span> / Project
+                </span>
               </div>
 
-              {/* Intro text */}
-              <p className="text-sm md:text-base text-slate-700 mb-3 md:mb-5 max-w-md font-medium">
-                Start charging <span className="underline underline-offset-2 decoration-orange-400"><span className="text-orange-600 font-bold">₹50,000</span>–<span className="text-orange-600 font-bold">₹1,00,000</span></span> for designing and rendering.
-              </p>
-
-              {/* Big headline */}
-              <h1 className="tracking-tight mb-2 md:mb-3">
-                <span className="block text-[2.2rem] leading-tight md:text-6xl font-display font-black text-slate-900 mb-0.5">
-                  Learn to Design
-                </span>
-                <span className="block text-[2rem] leading-none md:text-5xl font-display font-black">
-                  <span className="text-orange-600">Homes</span><span className="text-slate-400 font-light text-2xl md:text-3xl mx-1">,</span><span className="text-slate-900">Offices</span><span className="text-slate-400 font-light text-2xl md:text-3xl mx-1"> &</span><span className="text-slate-700">Villas</span>
-                </span>
-                <span className="block text-lg md:text-2xl font-serif italic text-slate-600 mt-1 md:mt-2">
-                  and show real 3D to clients.
+              {/* Big headline with 3-second dynamic toggle */}
+              <h1 className="tracking-tight mb-2 md:mb-3 min-h-[90px] md:min-h-[120px] flex flex-col justify-center items-center w-full">
+                <div key={headlineIndex} className="animate-in fade-in zoom-in-95 duration-500 text-center w-full">
+                  {headlineIndex === 0 ? (
+                    <>
+                      <span className="block text-3xl sm:text-4xl md:text-6xl font-display font-black text-slate-900 leading-tight">
+                        Learn to Design
+                      </span>
+                      <span className="block text-2xl sm:text-3xl md:text-5xl font-display font-black mt-1">
+                        <span className="text-orange-600">Homes</span><span className="text-slate-400 font-light mx-1">,</span><span className="text-slate-900">Offices</span><span className="text-slate-400 font-light mx-1"> &</span><span className="text-slate-700">Villas</span>
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="block text-2xl sm:text-3xl md:text-5xl font-display font-black text-slate-900 leading-tight">
+                        Learn Interior & Exterior
+                      </span>
+                      <span className="block text-3xl sm:text-4xl md:text-6xl font-display font-black text-orange-600 mt-1">
+                        Designing in 15 Days
+                      </span>
+                    </>
+                  )}
+                </div>
+                <span className="block text-base md:text-xl font-serif italic text-slate-600 mt-2">
+                  and present real 3D renders to clients.
                 </span>
               </h1>
 
-              {/* PDR line */}
-              <p className="text-sm md:text-base font-bold text-slate-800 mt-2 md:mt-4 mb-1">
-                Learn <span className="text-orange-600">PDR</span> — Planning, Designing & Rendering
-              </p>
-              <p className="text-xs md:text-sm text-slate-500 mb-5 md:mb-8 max-w-sm md:max-w-md">
-                One bundle. Everything included in your 3-Day Free Trial.
+              {/* Subhead Tagline */}
+              <p className="text-xs sm:text-sm md:text-base text-slate-600 max-w-lg mb-6 font-medium">
+                Master <strong className="text-slate-900 font-bold">PDR</strong> (Planning, Designing & Rendering). Everything included in your 3-Day Free Trial.
               </p>
 
-              {/* Story Block */}
-              <div className="w-full max-w-3xl mx-auto mb-6 md:mb-10 text-left bg-white p-5 md:p-8 rounded-2xl shadow-sm border border-orange-100 relative overflow-hidden">
-                <p className="text-sm md:text-lg font-serif text-slate-800 leading-relaxed mb-3 italic">
-                  "In our business of Architecture and Design, <span className="font-bold text-slate-900 border-b-2 border-orange-400">Planning, Design and Rendering</span> matter the most."
+              {/* Story & Video Block */}
+              <div className="w-full max-w-3xl mx-auto mb-6 text-left bg-white p-4 sm:p-6 md:p-8 rounded-2xl shadow-sm border border-orange-100 relative overflow-hidden">
+                <p className="text-sm md:text-base font-serif text-slate-800 leading-relaxed mb-2 italic">
+                  "In Architecture & Design, <span className="font-bold text-slate-900 border-b-2 border-orange-400">Planning, Design & Rendering</span> matter most."
                 </p>
-                <div className="w-10 h-1 bg-orange-500 rounded-full mb-3"></div>
-                <p className="text-xs md:text-base text-slate-600 leading-relaxed mb-3 font-medium">
-                  The question isn't <em className="text-slate-800 font-bold">if</em> you can. It's...
-                </p>
-                <p className="text-base md:text-2xl font-display font-black text-orange-600 mb-4">
-                  How to do it FASTER?
-                </p>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xs md:text-sm text-slate-500 font-medium">The key question is:</span>
+                  <span className="text-sm md:text-lg font-display font-black text-orange-600">How to do it FASTER with AI?</span>
+                </div>
+
                 {/* Hero Video */}
-                <div className="w-full mb-4 overflow-hidden rounded-xl shadow-xl" style={{ position: 'relative', paddingTop: '56.25%' }}>
+                <div className="w-full mb-4 overflow-hidden rounded-xl shadow-lg" style={{ position: 'relative', paddingTop: '56.25%' }}>
                   <iframe src="https://iframe.mediadelivery.net/embed/489113/a214b199-e64a-4eaf-af70-edfbc586e5fd?autoplay=true&loop=true&muted=true&preload=true&responsive=true" loading="lazy" style={{ border: 0, position: 'absolute', top: 0, height: '100%', width: '100%' }} allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;" allowFullScreen={true} />
                 </div>
 
-                <div className="flex items-start gap-3 p-3 md:p-4 bg-orange-50 border border-orange-100 rounded-xl">
-                  <span className="text-xl md:text-2xl mt-0.5 shrink-0">🚀</span>
-                  <p className="text-slate-700 font-medium leading-relaxed text-xs md:text-base">
-                    That's exactly why we built this. A complete blueprint — from software basics to client-ready renders — designed to make you <strong className="text-orange-600">job or business ready in just one month.</strong>
+                <div className="flex items-center gap-3 p-3 bg-orange-50/80 border border-orange-100 rounded-xl">
+                  <span className="text-lg md:text-xl shrink-0">🚀</span>
+                  <p className="text-slate-700 font-medium text-xs md:text-sm leading-snug">
+                    A complete blueprint from software basics to client renders — <strong className="text-orange-600 font-bold">Job & Business Ready in 30 Days.</strong>
                   </p>
                 </div>
               </div>
 
               {/* HERO CTA BUTTON */}
-              <div className="flex flex-col sm:flex-row gap-3 items-center mb-3 w-full sm:w-auto">
-                <button onClick={openPaymentModal} className="w-full sm:w-auto px-8 py-4 bg-orange-600 hover:bg-orange-700 text-white rounded-2xl font-extrabold text-sm md:text-lg shadow-xl shadow-orange-600/30 hover:scale-[1.03] transition-all flex items-center justify-center gap-3 group">
-                  <Sparkles size={20} className="shrink-0" />
+              <div className="flex flex-col sm:flex-row gap-3 items-center mb-2 w-full sm:w-auto">
+                <button onClick={openPaymentModal} className="w-full sm:w-auto px-8 py-4 bg-orange-600 hover:bg-orange-700 text-white rounded-2xl font-extrabold text-sm md:text-lg shadow-xl shadow-orange-600/30 hover:scale-[1.02] transition-all flex items-center justify-center gap-3 group cursor-pointer">
+                  <Sparkles size={20} className="shrink-0 text-amber-300" />
                   Start 3-Day Free Trial <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
                 </button>
               </div>
-              <p className="text-[10px] md:text-xs text-slate-500 mb-7 md:mb-10 font-bold">72 Hours Full Access • Mandate Authorization • Cancel Anytime</p>
+              <p className="text-[10px] md:text-xs text-slate-500 mb-6 font-bold">72 Hours Access • Card Authorization Only • Cancel Anytime</p>
+
+              {/* Green Freelance Projects Pill */}
+              <div className="w-full max-w-xl mx-auto mb-8 px-2">
+                <div className="w-full bg-[#059669] hover:bg-[#047857] text-white font-extrabold rounded-full py-3 px-5 shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 text-xs sm:text-sm tracking-wide text-center transition-all duration-300 transform hover:scale-[1.01]">
+                  <span>3 Freelance Paid Projects For Every Student (Worth 300 USD)</span>
+                </div>
+              </div>
 
               {/* Banners below First CTA */}
               <div className="w-full max-w-3xl mx-auto flex flex-col gap-4 md:gap-6 mb-8 md:mb-12">
@@ -566,7 +553,7 @@ const LandingPage: React.FC = () => {
           {/* Top Floating Student Count Badge */}
           <div className="relative z-10 inline-flex items-center gap-2 bg-white/95 backdrop-blur-sm rounded-full px-5 py-2 shadow-xl border border-orange-100">
             <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse shrink-0"></span>
-            <span className="text-sm font-black text-slate-900">{studentCount.toLocaleString('en-IN')}</span>
+            <span className="text-sm font-black text-slate-900">{studentCount.toLocaleString('en-US')}</span>
             <span className="text-xs text-slate-500 font-semibold">students already enrolled</span>
           </div>
 
@@ -593,7 +580,7 @@ const LandingPage: React.FC = () => {
                 <h3 className="text-2xl font-display font-black tracking-tight mb-1">All 7 Masterclass Courses</h3>
                 <div className="flex items-baseline gap-2.5">
                   <span className="text-3xl font-display font-black text-orange-400 whitespace-nowrap">Free Trial</span>
-                  <span className="text-slate-400 text-xs font-semibold">Then ₹399/mo after 3 days</span>
+                  <span className="text-slate-400 text-xs font-semibold">Then $20/mo after 3 days</span>
                 </div>
               </div>
             </div>
@@ -636,43 +623,6 @@ const LandingPage: React.FC = () => {
               <form onSubmit={handleModalSubmit} className="space-y-4 pt-1">
                 <div>
                   <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">
-                    Full Name
-                  </label>
-                  <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-orange-500/20 focus-within:border-orange-500 transition-all" style={nameError ? {borderColor:'#ef4444', backgroundColor:'#fef2f2'} : {}}>
-                    <User size={18} className="text-slate-400 shrink-0" strokeWidth={1.8} />
-                    <input
-                      type="text"
-                      placeholder="Your full name"
-                      value={name}
-                      onChange={(e) => { setName(e.target.value); setNameError(false); }}
-                      className="w-full bg-transparent text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none"
-                      required
-                    />
-                  </div>
-                  {nameError && <p className="text-red-500 text-[11px] mt-1 font-semibold">Please enter your full name</p>}
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">
-                    Phone Number (UPI Linked)
-                  </label>
-                  <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-orange-500/20 focus-within:border-orange-500 transition-all" style={phoneError ? {borderColor:'#ef4444', backgroundColor:'#fef2f2'} : {}}>
-                    <Phone size={18} className="text-slate-400 shrink-0" strokeWidth={1.8} />
-                    <span className="text-slate-500 font-semibold text-sm shrink-0 select-none">+91</span>
-                    <input
-                      type="tel"
-                      placeholder="10-digit mobile number"
-                      value={phone}
-                      onChange={(e) => { setPhone(e.target.value.replace(/\D/g, '').slice(0, 10)); setPhoneError(false); }}
-                      className="w-full bg-transparent text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none"
-                      required
-                    />
-                  </div>
-                  {phoneError && <p className="text-red-500 text-[11px] mt-1 font-semibold">Enter a valid 10-digit number</p>}
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">
                     Email Address
                   </label>
                   <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-orange-500/20 focus-within:border-orange-500 transition-all" style={emailError ? {borderColor:'#ef4444', backgroundColor:'#fef2f2'} : {}}>
@@ -696,7 +646,7 @@ const LandingPage: React.FC = () => {
                   className="w-full py-4 px-6 bg-orange-600 hover:bg-orange-700 text-white font-extrabold rounded-2xl text-base flex items-center justify-center gap-2.5 transition-all shadow-lg shadow-orange-600/30 active:scale-[0.98] disabled:opacity-70 cursor-pointer mt-4"
                 >
                   {isLoading ? (
-                    <><Loader2 className="animate-spin" size={20} /> Setting up trial mandate...</>
+                    <><Loader2 className="animate-spin" size={20} /> Redirecting to Stripe...</>
                   ) : (
                     <>
                       <Sparkles size={18} className="shrink-0 text-amber-300 fill-amber-300" />
@@ -709,7 +659,7 @@ const LandingPage: React.FC = () => {
 
               <div className="flex items-center justify-center gap-1.5 text-xs text-slate-400 font-medium text-center pt-2">
                 <Lock size={13} className="text-orange-500 shrink-0" />
-                <span>Razorpay UPI AutoPay • Mandate Authorization Only</span>
+                <span>Stripe Secure Checkout • Card Authorization Only</span>
               </div>
 
             </div>

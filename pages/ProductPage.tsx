@@ -66,15 +66,15 @@ export default function ProductPage() {
               {/* Price + CTA for desktop (visible alongside the card) */}
               <div className="hidden lg:flex flex-col gap-1 mb-6">
                 <div className="flex items-baseline gap-3">
-                  <span className="text-5xl font-extrabold text-emerald-400">₹0</span>
+                  <span className="text-5xl font-extrabold text-emerald-400">$0</span>
                   <span className="text-xl text-zinc-300 font-semibold">Today (3-Day Free Trial)</span>
-                  <span className="bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full">UPI AUTOPAY</span>
+                  <span className="bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full">STRIPE SECURE</span>
                 </div>
-                <span className="text-sm text-zinc-400">Auto-renews at ₹399/month starting Day 4. Cancel anytime.</span>
+                <span className="text-sm text-zinc-400">Auto-renews at $20/month starting Day 4. Cancel anytime.</span>
               </div>
               <div className="hidden lg:flex gap-4">
                 <Button size="lg" className="text-lg px-10 py-6 shadow-lg shadow-emerald-500/30 bg-emerald-600 hover:bg-emerald-500 text-white" onClick={handleCheckout}>
-                  Start 3-Day Free Trial (₹0) <ArrowRight size={18} className="ml-2" />
+                  Start 3-Day Free Trial ($0) <ArrowRight size={18} className="ml-2" />
                 </Button>
               </div>
 
@@ -237,10 +237,10 @@ export default function ProductPage() {
           <div className="flex items-center gap-3">
             <div>
               <div className="flex items-baseline gap-2">
-                <span className="text-xl md:text-2xl font-extrabold text-emerald-600">₹0</span>
+                <span className="text-xl md:text-2xl font-extrabold text-emerald-600">$0</span>
                 <span className="text-sm font-semibold text-muted-foreground">Today (3-Day Trial)</span>
               </div>
-              <p className="text-xs text-muted-foreground hidden sm:block">Then ₹399/month via UPI AutoPay • Cancel anytime</p>
+              <p className="text-xs text-muted-foreground hidden sm:block">Then $20/month via Stripe • Cancel anytime</p>
             </div>
           </div>
           <div className="flex items-center gap-3">

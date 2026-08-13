@@ -27,3 +27,6 @@ dist-ssr
 .env
 .env.*
 supabase/functions/.env
+
+# Scratch scripts
+scratch/

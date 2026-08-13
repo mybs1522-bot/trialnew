@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { ShoppingBag } from 'lucide-react';
 
 const PURCHASES = [
-    { name: 'Arjun from Mumbai', course: 'AutoCAD Mastery' },
-    { name: 'Priya from Bangalore', course: 'V-Ray Photorealism' },
-    { name: 'Rahul from Delhi', course: '3ds Max Advanced' }
+    { name: 'Alex from New York', course: 'AutoCAD Mastery' },
+    { name: 'Sophie from London', course: 'V-Ray Photorealism' },
+    { name: 'David from Los Angeles', course: '3ds Max Advanced' }
 ];
 
 export const PurchaseTicker: React.FC = () => {

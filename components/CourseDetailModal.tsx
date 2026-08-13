@@ -116,8 +116,8 @@ export const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
                     <div className="p-5 border-t border-gray-100 bg-white shrink-0">
                         <div className="flex items-center justify-between">
                             <div className="flex items-baseline gap-2">
-                                <span className="text-3xl font-display font-bold text-gray-900">₹{course.price}</span>
-                                <span className="text-sm text-gray-400 line-through">₹{course.originalPrice}</span>
+                                <span className="text-3xl font-display font-bold text-gray-900">${course.price}</span>
+                                <span className="text-sm text-gray-400 line-through">${course.originalPrice}</span>
                                 <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
                                     {Math.round((1 - course.price / course.originalPrice) * 100)}% OFF
                                 </span>

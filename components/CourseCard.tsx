@@ -62,8 +62,8 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, isInCart, onTogg
                 {/* Price + Button Row */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
                     <div className="flex items-baseline gap-1.5">
-                        <span className="text-xl md:text-2xl font-display font-bold text-gray-900">₹{course.price}</span>
-                        <span className="text-[10px] md:text-sm text-gray-400 line-through">₹{course.originalPrice}</span>
+                        <span className="text-xl md:text-2xl font-display font-bold text-gray-900">${course.price}</span>
+                        <span className="text-[10px] md:text-sm text-gray-400 line-through">${course.originalPrice}</span>
                     </div>
 
                     <button
