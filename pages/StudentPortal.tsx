@@ -6,10 +6,11 @@ import { sendStudentWelcomeEmail } from '../lib/email';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { AddToHomeScreenModal } from '../components/AddToHomeScreenModal';
 import { 
   PlayCircle, ShieldCheck, Clock, BookOpen, UserCheck, 
   Sparkles, LogOut, Video, ArrowLeft, ChevronRight, CheckCircle2,
-  Lock, AlertTriangle, Loader2, User
+  Lock, AlertTriangle, Loader2, User, Smartphone
 } from 'lucide-react';
 
 
@@ -925,6 +926,7 @@ export default function StudentPortal() {
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [subStatusInfo, setSubStatusInfo] = useState<{ active: boolean; status: string }>({ active: true, status: 'active' });
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showPwaModal, setShowPwaModal] = useState(false);
 
   // Handle returning from Stripe Checkout with success
   useEffect(() => {
@@ -1336,6 +1338,15 @@ export default function StudentPortal() {
                   </div>
                 </div>
 
+                {/* Add to Home Screen Button */}
+                <Button 
+                  size="sm" 
+                  onClick={() => { setShowProfileMenu(false); setShowPwaModal(true); }} 
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs justify-start mb-2"
+                >
+                  <Smartphone size={14} className="mr-2" /> Add App to Home Screen
+                </Button>
+
                 {/* Sign Out Button */}
                 <Button 
                   variant="outline" 
@@ -1350,6 +1361,8 @@ export default function StudentPortal() {
           )}
         </div>
       </div>
+
+      <AddToHomeScreenModal isOpen={showPwaModal} onClose={() => setShowPwaModal(false)} />
     </div>
   );
 }
