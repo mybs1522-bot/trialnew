@@ -31,7 +31,17 @@ export const createStripeCheckoutSession = async (
       }),
     });
 
-    const data = await response.json();
+    const textResponse = await response.text();
+    let data: any = {};
+    try {
+      data = JSON.parse(textResponse);
+    } catch (e) {
+      console.error('Server returned non-JSON response:', textResponse);
+      return {
+        error: `Server endpoint error (${response.status}). If running on Vercel, please ensure STRIPE_SECRET_KEY is added under Vercel Settings -> Environment Variables.`,
+      };
+    }
+
     if (response.ok && (data.clientSecret || data.url)) {
       if (customerDetails?.email) {
         localStorage.setItem(
